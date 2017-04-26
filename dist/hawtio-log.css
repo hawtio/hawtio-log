@@ -18,22 +18,31 @@ div[ng-view] {
   flex: 1 1 auto;
   overflow-y: auto;
   position: relative;
+  border-left: 1px solid #d1d1d1;
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 1px solid #d1d1d1;
 }
-.log-jmx-main mark {
-  background-color: #ff0;
-  padding: 0;
+.log-jmx-main .log-jmx-flex-container .log-jmx-scrollable-table tr:first-child td {
+  border-top-width: 0;
+}
+.log-jmx-main .log-jmx-header-table {
+  border: 1px solid #d1d1d1;
+}
+.log-jmx-main .log-jmx-header-table th {
+  border-bottom-width: 0;
 }
 .log-jmx-main .table {
   table-layout: fixed;
+  margin-bottom: 0;
 }
 .log-jmx-main .table th:nth-child(1) {
   width: 150px;
 }
 .log-jmx-main .table th:nth-child(2) {
-  width: 100px;
+  width: 60px;
 }
 .log-jmx-main .table th:nth-child(3) {
-  width: 200px;
+  width: 30%;
 }
 .log-jmx-main .table th:nth-child(4) {
   width: auto;
@@ -42,17 +51,19 @@ div[ng-view] {
   width: 150px;
 }
 .log-jmx-main .table td:nth-child(2) {
-  width: 100px;
+  width: 60px;
 }
 .log-jmx-main .table td:nth-child(3) {
-  width: 200px;
+  width: 30%;
+  word-break: break-all;
 }
 .log-jmx-main .table td:nth-child(4) {
   width: auto;
-}
-.log-jmx-main .log-jmx-header-table {
-  margin-bottom: 0;
+  word-break: break-all;
 }
 .log-jmx-main .pf-table-view-selected-label {
   display: none;
+}
+.log-jmx-main .log-jmx-stacktrace-list-item:not(:first-child) {
+  padding-left: 14px;
 }

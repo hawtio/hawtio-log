@@ -1,0 +1,35 @@
+<form class="form-horizontal" ng-controller="LogPreferencesController">
+
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="logSortAsc">Sort ascending</label>
+    <div class="col-sm-10">
+      <input type="checkbox" id="logSortAsc" ng-model="logSortAsc">
+      <span class="help-block">Sort log entries by timestamp ascending</span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="logAutoScroll">Auto scroll</label>
+    <div class="col-sm-10">
+      <input type="checkbox" id="logAutoScroll" ng-model="logAutoScroll">
+      <span class="help-block">Automatically scroll when new log entries are added</span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="logCacheSize" title="The number of log messages to keep in the browser">Log
+      cache size</label>
+    <div class="col-sm-10">
+      <input id="logCacheSize" type="number" ng-model="logCacheSize" min="0"/>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="logBatchSize" title="The maximum number of log messages to retrieve when loading new log lines">Log
+      batch size</label>
+    <div class="col-sm-10">
+      <input id="logBatchSize" type="number" ng-model="logBatchSize" min="1" max="1000"/>
+    </div>
+  </div>
+
+</form>
