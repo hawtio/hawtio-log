@@ -338,6 +338,7 @@ var Log;
                 resultsCount: $scope.filteredLogs.length,
                 appliedFilters: [],
                 onFilterChange: function (filters) {
+                    removePreviousLevelFilter(filters);
                     $scope.messageSearchText = getMessageFilterValues(filters);
                     $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
                 }
@@ -347,6 +348,9 @@ var Log;
             return filters.filter(function (filter) { return filter.id === 'message'; }).map(function (filter) { return filter.value; });
         }
         ;
+        function removePreviousLevelFilter(filters) {
+            _.remove(filters, function (filter, index) { return filter.id === 'level' && index < filters.length - 1; });
+        }
         $scope.openLogModal = function (logEntry) {
             $scope.logEntry = logEntry;
             $uibModal.open({
