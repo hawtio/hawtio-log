@@ -53,7 +53,8 @@ namespace Log {
     };
 
     function removePreviousLevelFilter(filters: any[]) {
-      _.remove(filters, (filter, index) => filter.id === 'level' && index < filters.length - 1);
+      _.remove(filters, (filter, index) => filter.id === 'level' && index < filters.length - 1 &&
+        filters[filters.length - 1].id === 'level');
     }
 
     $scope.openLogModal = (logEntry: LogEntry) => {
