@@ -40,22 +40,30 @@ namespace Log {
         totalCount: $scope.logs.length,
         resultsCount: $scope.filteredLogs.length,
         appliedFilters: [],
-        onFilterChange(filters) {
-          removePreviousLevelFilter(filters);
-          $scope.messageSearchText = getMessageFilterValues(filters);
-          $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
-        }
+        onFilterChange: onFilterChange
       }
     }
 
-    function getMessageFilterValues(filters: any[]) {
-      return filters.filter(filter => filter.id === 'message').map(filter => filter.value);
-    };
+    function onFilterChange(filters) {
+      let tableScrolled = isTableScrolled();
+      
+      removePreviousLevelFilter(filters);
+      $scope.messageSearchText = getMessageFilterValues(filters);
+      $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
+      
+      if (tableScrolled) {
+        scrollTable();
+      }
+    }
 
     function removePreviousLevelFilter(filters: any[]) {
       _.remove(filters, (filter, index) => filter.id === 'level' && index < filters.length - 1 &&
         filters[filters.length - 1].id === 'level');
     }
+
+    function getMessageFilterValues(filters: any[]) {
+      return filters.filter(filter => filter.id === 'message').map(filter => filter.value);
+    };
 
     $scope.openLogModal = (logEntry: LogEntry) => {
       $scope.logEntry = logEntry;
@@ -70,8 +78,10 @@ namespace Log {
     function processLogEntries(response) {
       if (response.logEntries.length > 0) {
         let tableScrolled = isTableScrolled();
+        
         logsService.appendLogs($scope.logs, response.logEntries);
         $scope.filteredLogs = logsService.filterLogs($scope.logs, $scope.toolbarConfig.filterConfig);
+        
         if (tableScrolled) {
           scrollTable();
         }
@@ -107,13 +117,11 @@ namespace Log {
       }
     }
 
-    if (logsService.treeContainsLogQueryMBean()) {
-      logsService.getInitialLogs()
-        .then(processLogEntries)
-        .catch(error => {
-          Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
-        });
-    }
+    logsService.getInitialLogs()
+      .then(processLogEntries)
+      .catch(error => {
+        Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+      });
   }
 
 }

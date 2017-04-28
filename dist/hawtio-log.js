@@ -1,3 +1,6 @@
+/// <reference path="../../../libs/hawtio-core-dts/angular.d.ts"/>
+/// <reference path="../../../libs/hawtio-preferences/defs.d.ts"/> 
+/// <reference path="../includes.ts"/>
 var Log;
 (function (Log) {
     LogPreferencesController.$inject = ["$scope", "localStorage"];
@@ -102,23 +105,25 @@ var Log;
     }());
     Log.LogEntry = LogEntry;
 })(Log || (Log = {}));
+/// <reference path="../includes.ts"/>
 /// <reference path="log-entry.ts"/>
 var Log;
 (function (Log) {
     var LogsService = (function () {
-        LogsService.$inject = ["$q", "jolokia", "workspace", "localStorage"];
-        function LogsService($q, jolokia, workspace, localStorage) {
+        LogsService.$inject = ["$q", "jolokia", "localStorage"];
+        function LogsService($q, jolokia, localStorage) {
             'ngInject';
+            var _this = this;
             this.$q = $q;
             this.jolokia = jolokia;
-            this.workspace = workspace;
             this.localStorage = localStorage;
+            this.getLogQueryMBean()
+                .then(function (mbean) { return _this.logQueryBean = mbean; });
         }
         LogsService.prototype.getInitialLogs = function () {
             var _this = this;
-            var logQueryBean = this.findLogQueryMBean();
             return this.$q(function (resolve, reject) {
-                _this.jolokia.execute(logQueryBean, "getLogResults(int)", _this.getLogCacheSize(), {
+                _this.jolokia.execute(_this.logQueryBean, "getLogResults(int)", _this.getLogCacheSize(), {
                     success: function (response) {
                         if (response.events) {
                             response.logEntries = response.events.map(function (event) { return new Log.LogEntry(event); });
@@ -135,9 +140,8 @@ var Log;
         };
         LogsService.prototype.getMoreLogs = function (fromTimestamp) {
             var _this = this;
-            var logQueryBean = this.findLogQueryMBean();
             return this.$q(function (resolve, reject) {
-                _this.jolokia.execute(logQueryBean, "jsonQueryLogResults", JSON.stringify({ afterTimestamp: fromTimestamp, count: _this.getLogBatchSize() }), {
+                _this.jolokia.execute(_this.logQueryBean, "jsonQueryLogResults", JSON.stringify({ afterTimestamp: fromTimestamp, count: _this.getLogBatchSize() }), {
                     success: function (response) {
                         if (response.events) {
                             response.logEntries = response.events.map(function (event) { return new Log.LogEntry(event); });
@@ -184,16 +188,21 @@ var Log;
             filterConfig.resultsCount = filteredLogs.length;
             return filteredLogs;
         };
-        LogsService.prototype.findLogQueryMBean = function () {
-            var node = this.workspace.findMBeanWithProperties('io.fabric8.insight', { type: 'LogQuery' });
-            if (!node) {
-                node = this.workspace.findMBeanWithProperties('org.fusesource.insight', { type: 'LogQuery' });
-            }
-            return node ? node.objectName : null;
-        };
-        LogsService.prototype.treeContainsLogQueryMBean = function () {
-            return this.workspace.treeContainsDomainAndProperties('io.fabric8.insight', { type: 'LogQuery' }) ||
-                this.workspace.treeContainsDomainAndProperties('org.fusesource.insight', { type: 'LogQuery' });
+        LogsService.prototype.getLogQueryMBean = function () {
+            var _this = this;
+            return this.$q(function (resolve, reject) {
+                _this.jolokia.search('*:type=LogQuery', {
+                    success: function (response) {
+                        if (response.length > 0) {
+                            resolve(response[0]);
+                        }
+                        else {
+                            resolve(null);
+                        }
+                    },
+                    error: function (response) { return reject(response.error); }
+                });
+            });
         };
         LogsService.prototype.isLogSortAsc = function () {
             var logSortAsc = this.localStorage.getItem('logSortAsc');
@@ -219,7 +228,7 @@ var Log;
 var Log;
 (function (Log) {
     LogConfig.$inject = ["$routeProvider"];
-    LogRun.$inject = ["workspace", "helpRegistry", "preferencesRegistry", "logsService"];
+    LogRun.$inject = ["helpRegistry", "preferencesRegistry", "HawtioNav", "logsService"];
     var hasMBean = false;
     function LogConfig($routeProvider) {
         'ngInject';
@@ -237,21 +246,24 @@ var Log;
             }, reloadOnSearch: false });
     }
     Log.LogConfig = LogConfig;
-    function LogRun(workspace, helpRegistry, preferencesRegistry, logsService) {
+    function LogRun(helpRegistry, preferencesRegistry, HawtioNav, logsService) {
         'ngInject';
-        hasMBean = logsService.treeContainsLogQueryMBean();
-        helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', function () {
-            return logsService.treeContainsLogQueryMBean();
-        });
-        preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", function () {
-            return logsService.treeContainsLogQueryMBean();
-        });
-        workspace.topLevelTabs.push({
-            id: "logs",
-            content: "Logs",
-            title: "View and search the logs of this container",
-            isValid: function (workspace) { return logsService.treeContainsLogQueryMBean(); },
-            href: function () { return "/logs"; }
+        logsService.getLogQueryMBean()
+            .then(function (mbean) {
+            hasMBean = mbean !== null;
+            helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', function () {
+                return hasMBean;
+            });
+            preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", function () {
+                return hasMBean;
+            });
+            var navItem = HawtioNav.builder()
+                .id('logs')
+                .title(function () { return 'Logs'; })
+                .isValid(function () { return hasMBean; })
+                .href(function () { return '/logs'; })
+                .build();
+            HawtioNav.add(navItem);
         });
     }
     Log.LogRun = LogRun;
@@ -337,21 +349,26 @@ var Log;
                 totalCount: $scope.logs.length,
                 resultsCount: $scope.filteredLogs.length,
                 appliedFilters: [],
-                onFilterChange: function (filters) {
-                    removePreviousLevelFilter(filters);
-                    $scope.messageSearchText = getMessageFilterValues(filters);
-                    $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
-                }
+                onFilterChange: onFilterChange
             }
         };
-        function getMessageFilterValues(filters) {
-            return filters.filter(function (filter) { return filter.id === 'message'; }).map(function (filter) { return filter.value; });
+        function onFilterChange(filters) {
+            var tableScrolled = isTableScrolled();
+            removePreviousLevelFilter(filters);
+            $scope.messageSearchText = getMessageFilterValues(filters);
+            $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
+            if (tableScrolled) {
+                scrollTable();
+            }
         }
-        ;
         function removePreviousLevelFilter(filters) {
             _.remove(filters, function (filter, index) { return filter.id === 'level' && index < filters.length - 1 &&
                 filters[filters.length - 1].id === 'level'; });
         }
+        function getMessageFilterValues(filters) {
+            return filters.filter(function (filter) { return filter.id === 'message'; }).map(function (filter) { return filter.value; });
+        }
+        ;
         $scope.openLogModal = function (logEntry) {
             $scope.logEntry = logEntry;
             $uibModal.open({
@@ -399,13 +416,11 @@ var Log;
                 }
             }
         }
-        if (logsService.treeContainsLogQueryMBean()) {
-            logsService.getInitialLogs()
-                .then(processLogEntries)
-                .catch(function (error) {
-                Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
-            });
-        }
+        logsService.getInitialLogs()
+            .then(processLogEntries)
+            .catch(function (error) {
+            Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+        });
     }
     Log.LogsController = LogsController;
 })(Log || (Log = {}));
@@ -425,7 +440,7 @@ var Log;
         .service('logsService', Log.LogsService)
         .name;
 })(Log || (Log = {}));
-/// <reference path="../../../libs/hawtio-jmx/defs.d.ts"/>
+/// <reference path="includes.ts"/>
 /// <reference path="log-preferences/log-preferences.module.ts"/>
 /// <reference path="logs/logs.module.ts"/>
 var Log;

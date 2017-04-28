@@ -1,4 +1,4 @@
-/// <reference path="../../../libs/hawtio-jmx/defs.d.ts"/>
+/// <reference path="includes.ts"/>
 /// <reference path="log-preferences/log-preferences.module.ts"/>
 /// <reference path="logs/logs.module.ts"/>
 

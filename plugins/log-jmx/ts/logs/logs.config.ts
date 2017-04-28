@@ -2,7 +2,7 @@
 
 namespace Log {
   
-  var hasMBean = false;
+  let hasMBean = false;
 
   export function LogConfig($routeProvider) {
     'ngInject';
@@ -20,26 +20,30 @@ namespace Log {
       }, reloadOnSearch: false});
   }
 
-  export function LogRun(workspace, helpRegistry, preferencesRegistry, logsService) {
+  export function LogRun(helpRegistry, preferencesRegistry, HawtioNav: HawtioMainNav.Registry,
+    logsService: LogsService) {
     'ngInject';
 
-    hasMBean = logsService.treeContainsLogQueryMBean();
+    logsService.getLogQueryMBean()
+      .then(mbean => {
+        hasMBean = mbean !== null;
 
-    helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', () => {
-      return logsService.treeContainsLogQueryMBean();
-    });
+        helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', () => {
+          return hasMBean;
+        });
 
-    preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", () => {
-      return logsService.treeContainsLogQueryMBean();
-    });
+        preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", () => {
+          return hasMBean;
+        });
 
-    workspace.topLevelTabs.push({
-      id: "logs",
-      content: "Logs",
-      title: "View and search the logs of this container",
-      isValid: workspace => logsService.treeContainsLogQueryMBean(),
-      href: () => "/logs"
-    });
+        let navItem = HawtioNav.builder()
+          .id('logs')
+          .title(() => 'Logs')
+          .isValid(() => hasMBean)
+          .href(() => '/logs')
+          .build();
+        HawtioNav.add(navItem);
+      });
   }
 
 }

@@ -1,4 +1,5 @@
-/// <reference path="libs/hawtio-jmx/defs.d.ts" />
+/// <reference path="libs/hawtio-core-dts/angular.d.ts" />
+/// <reference path="libs/hawtio-preferences/defs.d.ts" />
 declare namespace Log {
     function LogPreferencesController($scope: any, localStorage: any): void;
 }
@@ -39,15 +40,14 @@ declare namespace Log {
     class LogsService {
         private $q;
         private jolokia;
-        private workspace;
         private localStorage;
-        constructor($q: ng.IQService, jolokia: Jolokia.IJolokia, workspace: any, localStorage: Storage);
+        private logQueryBean;
+        constructor($q: ng.IQService, jolokia: Jolokia.IJolokia, localStorage: Storage);
         getInitialLogs(): ng.IPromise<LogEntry[]>;
         getMoreLogs(fromTimestamp: number): ng.IPromise<LogEntry[]>;
         appendLogs(logs: LogEntry[], logEntries: LogEntry[]): LogEntry[];
         filterLogs(logs: LogEntry[], filterConfig: any): LogEntry[];
-        private findLogQueryMBean();
-        treeContainsLogQueryMBean(): any;
+        getLogQueryMBean(): ng.IPromise<string>;
         isLogSortAsc(): boolean;
         isLogAutoScroll(): boolean;
         getLogCacheSize(): number;
@@ -56,7 +56,7 @@ declare namespace Log {
 }
 declare namespace Log {
     function LogConfig($routeProvider: any): void;
-    function LogRun(workspace: any, helpRegistry: any, preferencesRegistry: any, logsService: any): void;
+    function LogRun(helpRegistry: any, preferencesRegistry: any, HawtioNav: HawtioMainNav.Registry, logsService: LogsService): void;
 }
 declare namespace Log {
     function logDateFilter($filter: any): (log: any) => any;

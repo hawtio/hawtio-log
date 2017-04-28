@@ -1,19 +1,21 @@
+/// <reference path="../includes.ts"/>
 /// <reference path="log-entry.ts"/>
 
 namespace Log {
 
   export class LogsService {
 
-    constructor(private $q: ng.IQService, private jolokia: Jolokia.IJolokia, private workspace,
-      private localStorage: Storage) {
+    private logQueryBean: string;
+
+    constructor(private $q: ng.IQService, private jolokia: Jolokia.IJolokia, private localStorage: Storage) {
       'ngInject';
+      this.getLogQueryMBean()
+        .then(mbean => this.logQueryBean = mbean);
     }
 
     getInitialLogs(): ng.IPromise<LogEntry[]> {
-      let logQueryBean = this.findLogQueryMBean();
-      
       return this.$q((resolve, reject) => {
-        this.jolokia.execute(logQueryBean, "getLogResults(int)", this.getLogCacheSize(), { 
+        this.jolokia.execute(this.logQueryBean, "getLogResults(int)", this.getLogCacheSize(), { 
           success: response => {
             if (response.events) {
               response.logEntries = response.events.map(event => new LogEntry(event));
@@ -29,10 +31,8 @@ namespace Log {
     }
 
     getMoreLogs(fromTimestamp: number): ng.IPromise<LogEntry[]> {
-      let logQueryBean = this.findLogQueryMBean();
-      
       return this.$q((resolve, reject) => {
-        this.jolokia.execute(logQueryBean, "jsonQueryLogResults",
+        this.jolokia.execute(this.logQueryBean, "jsonQueryLogResults",
           JSON.stringify({ afterTimestamp: fromTimestamp, count: this.getLogBatchSize() }), {
             success: response => {
               if (response.events) {
@@ -87,17 +87,19 @@ namespace Log {
       return filteredLogs;
     }
 
-    private findLogQueryMBean() {
-      var node = this.workspace.findMBeanWithProperties('io.fabric8.insight', {type: 'LogQuery'});
-      if (!node) {
-        node = this.workspace.findMBeanWithProperties('org.fusesource.insight', {type: 'LogQuery'});
-      }
-      return node ? node.objectName : null;
-    }
-
-    treeContainsLogQueryMBean() {
-      return this.workspace.treeContainsDomainAndProperties('io.fabric8.insight', {type: 'LogQuery'}) ||
-        this.workspace.treeContainsDomainAndProperties('org.fusesource.insight', {type: 'LogQuery'});
+    getLogQueryMBean(): ng.IPromise<string> {
+      return this.$q((resolve, reject) => {
+        this.jolokia.search('*:type=LogQuery', {
+            success: response => {
+              if (response.length > 0) {
+                resolve(response[0])
+              } else {
+                resolve(null);
+              }
+            },
+            error: response => reject(response.error)
+          });
+      });      
     }
 
     isLogSortAsc(): boolean {
