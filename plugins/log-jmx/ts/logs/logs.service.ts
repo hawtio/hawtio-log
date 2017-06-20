@@ -1,4 +1,3 @@
-/// <reference path="../includes.ts"/>
 /// <reference path="log-entry.ts"/>
 
 namespace Log {

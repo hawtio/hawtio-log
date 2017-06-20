@@ -1,6 +1,3 @@
-/// <reference path="../../../libs/hawtio-core-dts/angular.d.ts"/>
-/// <reference path="../../../libs/hawtio-preferences/defs.d.ts"/> 
-/// <reference path="../includes.ts"/>
 var Log;
 (function (Log) {
     LogPreferencesController.$inject = ["$scope", "localStorage"];
@@ -105,7 +102,6 @@ var Log;
     }());
     Log.LogEntry = LogEntry;
 })(Log || (Log = {}));
-/// <reference path="../includes.ts"/>
 /// <reference path="log-entry.ts"/>
 var Log;
 (function (Log) {
@@ -440,7 +436,6 @@ var Log;
         .service('logsService', Log.LogsService)
         .name;
 })(Log || (Log = {}));
-/// <reference path="includes.ts"/>
 /// <reference path="log-preferences/log-preferences.module.ts"/>
 /// <reference path="logs/logs.module.ts"/>
 var Log;

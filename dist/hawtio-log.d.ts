@@ -1,5 +1,5 @@
-/// <reference path="libs/hawtio-core-dts/angular.d.ts" />
-/// <reference path="libs/hawtio-preferences/defs.d.ts" />
+/// <reference types="angular" />
+/// <reference types="core-navigation" />
 declare namespace Log {
     function LogPreferencesController($scope: any, localStorage: any): void;
 }
