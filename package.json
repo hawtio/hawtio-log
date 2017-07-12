@@ -9,7 +9,8 @@
   "scripts": {
     "start": "gulp",
     "build": "gulp build",
-    "install:dev": "yarn install --flat --prod && yarn install",
+    "install:dev": "yarn install --flat --prod && yarn install --production=false",
+    "upgrade:dev": "yarn upgrade && yarn run install:dev",
     "test": "gulp build"
   },
   "dependencies": {
@@ -41,16 +42,22 @@
     "underscore.string": "^3.0.0",
     "yargs": "^6.0.0"
   },
+  "resolutions": {
+    "angular": "1.6.5",
+    "angular-sanitize": "1.6.5",
+    "jquery": "2.2.4",
+    "angular-ui-bootstrap": "2.5.0",
+    "bootstrap-select": "1.12.3",
+    "@types/jquery": "2.0.48",
+    "datatables.net": "1.10.15",
+    "moment": "2.18.1"
+  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:hawtio/hawtio-log.git"
   },
-  "resolutions": {
-    "angular": "1.6.4",
-    "angular-sanitize": "1.6.4",
-    "jquery": "2.2.4",
-    "angular-ui-bootstrap": "2.5.0",
-    "bootstrap-select": "1.12.2"
+  "publishConfig": {
+    "access": "public"
   }
 }
