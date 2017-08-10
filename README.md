@@ -26,28 +26,28 @@ cd hawtio-log
 ### Install project dependencies
 
 ```
-yarn install:dev
+yarn install
 ```
 
 ### Run the web application
 
 ```
-gulp
+yarn start
 ```
 
 ### Change the default proxy port
 
-To proxy to a local JVM running on a different port than `8282` specify the `--port` CLI arguement to gulp:
+To proxy to a local JVM running on a different port than `8282` specify the `--port` CLI argument:
 ```
-gulp --port=8181
+yarn start -- --port=8181
 ```
 
 ### Turn on source maps generation for debugging TypeScript
 
-If you want to debug `.ts` using a browser developer tool such as Chrome DevTools, pass the `--sourcemap` flag to gulp:
+If you want to debug `.ts` using a browser developer tool such as Chrome DevTools, pass the `--sourcemap` flag:
 
 ```
-gulp --sourcemap
+yarn start -- --sourcemap
 ```
 
 Do not use this flag when you are committing the compiled `.js` file, as it embeds source maps to the output file. Use this flag only during development.
