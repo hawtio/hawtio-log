@@ -1,5 +1,5 @@
 /// <reference types="angular" />
-/// <reference types="core-navigation" />
+/// <reference types="core" />
 declare namespace Log {
     function LogPreferencesController($scope: any, localStorage: any): void;
 }
