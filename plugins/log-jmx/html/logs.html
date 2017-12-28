@@ -3,9 +3,7 @@
   <div class="log-jmx-flex-container">
     <div class="log-jmx-fixed-toolbar">
       <h1>Log</h1>
-      <div ng-show="logs.length === 0">
-        <div class="spinner spinner-lg loading-page"></div>
-      </div>
+      <p ng-show="logs.length === 0">Loading...</p>
       <div ng-show="logs.length > 0">
         <pf-toolbar config="toolbarConfig"></pf-toolbar>
         <table class="table table-striped log-jmx-header-table">
