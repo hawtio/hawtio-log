@@ -2,7 +2,10 @@ namespace Log {
 
   export function LogPreferencesController($scope, localStorage) {
     'ngInject';
-    
+
+    // Initialize tooltips
+    (<any>$('[data-toggle="tooltip"]')).tooltip();
+
     Core.initPreferenceScope($scope, localStorage, {
       'logSortAsc': {
         'value': true,

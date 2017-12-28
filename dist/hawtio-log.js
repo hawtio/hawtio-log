@@ -3,6 +3,8 @@ var Log;
     LogPreferencesController.$inject = ["$scope", "localStorage"];
     function LogPreferencesController($scope, localStorage) {
         'ngInject';
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
         Core.initPreferenceScope($scope, localStorage, {
             'logSortAsc': {
                 'value': true,
