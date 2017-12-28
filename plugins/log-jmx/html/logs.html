@@ -27,10 +27,10 @@
             <td><samp>{{logEntry | logDateFilter}}</samp></td>
             <td class="{{logEntry.levelClass}}"><samp>{{logEntry.level}}</samp></td>
             <td ng-switch="logEntry.hasLogSourceHref">
-              <a href="" ng-switch-when="true" ng-click="openLogModal(logEntry)"><samp>{{logEntry.logger}}</samp></a>
-              <samp ng-switch-default>{{logEntry.logger}}</samp>
+              <a href="" ng-switch-when="true" ng-click="openLogModal(logEntry)">{{logEntry.logger}}</a>
+              <span ng-switch-default>{{logEntry.logger}}</span>
             </td>
-            <td><samp ng-bind-html="logEntry.sanitizedMessage | highlight:messageSearchText"></samp></td>
+            <td ng-bind-html="logEntry.sanitizedMessage | highlight:messageSearchText"></td>
           </tr>
         </tbody>
       </table>

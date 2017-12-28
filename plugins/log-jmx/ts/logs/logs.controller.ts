@@ -41,7 +41,8 @@ namespace Log {
         resultsCount: $scope.filteredLogs.length,
         appliedFilters: [],
         onFilterChange: onFilterChange
-      }
+      },
+      isTableView: true
     }
 
     function onFilterChange(filters) {

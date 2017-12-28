@@ -17,7 +17,7 @@ var config = {
   logLevel: argv.debug ? logger.DEBUG : logger.INFO,
   ts: ['plugins/**/*.ts'],
   less: ['plugins/**/*.less'],
-  templates: ['plugins/**/*.html'],
+  templates: ['plugins/**/*.html', 'plugins/**/*.md'],
   templateModule: 'hawtio-log-templates',
   dist: argv.out || './dist/',
   js: 'hawtio-log.js',
@@ -90,13 +90,14 @@ gulp.task('connect', ['watch'], function() {
   hawtio.setConfig({
     logLevel: config.logLevel,
     port: 2772,
+    proxy: '/hawtio/proxy',
     staticProxies: [{
       port: config.proxyPort,
       path: '/jolokia',
       targetPath: config.targetPath
     }],
     staticAssets: [{
-      path: '/',
+      path: '/hawtio/',
       dir: '.'
 
     }],
@@ -107,8 +108,10 @@ gulp.task('connect', ['watch'], function() {
   });
   hawtio.use('/', function(req, res, next) {
           var path = req.originalUrl;
-          // avoid returning these files, they should get pulled from js
-          if (s.startsWith(path, '/plugins/') && s.endsWith(path, 'html')) {
+          if (path === '/') {
+            res.redirect('/hawtio');
+          } else if (s.startsWith(path, '/plugins/') && s.endsWith(path, 'html')) {
+            // avoid returning these files, they should get pulled from js
             console.log("returning 404 for: ", path);
             res.statusCode = 404;
             res.end();
