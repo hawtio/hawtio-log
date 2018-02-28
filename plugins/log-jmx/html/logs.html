@@ -22,8 +22,8 @@
       <table class="table table-striped">
         <tbody>
           <tr ng-repeat="logEntry in filteredLogs">
-            <td><samp>{{logEntry | logDateFilter}}</samp></td>
-            <td class="{{logEntry.levelClass}}"><samp>{{logEntry.level}}</samp></td>
+            <td>{{logEntry | logDateFilter}}</td>
+            <td class="{{logEntry.levelClass}}">{{logEntry.level}}</td>
             <td ng-switch="logEntry.hasLogSourceHref">
               <a href="" ng-switch-when="true" ng-click="openLogModal(logEntry)">{{logEntry.logger}}</a>
               <span ng-switch-default>{{logEntry.logger}}</span>
@@ -45,50 +45,50 @@
     <div class="modal-body">
       <dl class="dl-horizontal">
         <dt>Timestamp</dt>
-        <dd><samp>{{logEntry | logDateFilter}}</samp></dd>
+        <dd>{{logEntry | logDateFilter}}</dd>
         <dt>Level</dt>
-        <dd class="{{logEntry.levelClass}}"><samp>{{logEntry.level}}</samp></dd>
+        <dd class="{{logEntry.levelClass}}">{{logEntry.level}}</dd>
         <dt>Logger</dt>
-        <dd><samp>{{logEntry.logger}}</samp></dd>
+        <dd>{{logEntry.logger}}</dd>
         <div ng-show="logEntry.hasLogSourceLineHref">
           <dt>Class</dt>
-          <dd><samp>{{logEntry.className}}</samp></dd>
+          <dd>{{logEntry.className}}</dd>
           <dt>Method</dt>
-          <dd><samp>{{logEntry.methodName}}</samp></dd>
+          <dd>{{logEntry.methodName}}</dd>
           <dt>File</dt>
-          <dd><samp>{{logEntry.fileName}}:{{logEntry.lineNumber}}</samp></dd>
+          <dd>{{logEntry.fileName}}:{{logEntry.lineNumber}}</dd>
         </div>
         <div ng-show="logEntry.host">
           <dt>Host</dt>
-          <dd><samp>{{logEntry.host}}</samp></dd>
+          <dd>{{logEntry.host}}</dd>
         </div>
         <dt>Thread</dt>
-        <dd><samp>{{logEntry.thread}}</samp></dd>
+        <dd>{{logEntry.thread}}</dd>
         <div ng-show="logEntry.hasOSGiProps">
           <div ng-show="logEntry.properties['bundle.name']">
             <dt>Bundle Name</dt>
-            <dd><samp>{{logEntry.properties['bundle.name']}}</samp></dd>
+            <dd>{{logEntry.properties['bundle.name']}}</dd>
           </div>
           <div ng-show="logEntry.properties['bundle.id']">
             <dt>Bundle ID</dt>
-            <dd><samp>{{logEntry.properties['bundle.id']}}</samp></dd>
+            <dd>{{logEntry.properties['bundle.id']}}</dd>
           </div>
           <div ng-show="logEntry.properties['bundle.version']">
             <dt>Bundle Version</dt>
-            <dd><samp>{{logEntry.properties['bundle.version']}}</samp></dd>
+            <dd>{{logEntry.properties['bundle.version']}}</dd>
           </div>
         </div>
         <dt>Message</dt>
-        <dd><samp>{{logEntry.sanitizedMessage}}</samp></dd>
+        <dd>{{logEntry.sanitizedMessage}}</dd>
       </dl>
       <dl ng-if="logEntry.exception">
         <dt>Stack Trace</dt>
         <dd>
-          <samp>
+          
             <ul class="list-unstyled">
               <li ng-repeat="frame in logEntry.exception" class="log-jmx-stacktrace-list-item">{{frame}}</li>
             </ul>
-          </samp>
+          
         </dd>
       </dl>
     </div>

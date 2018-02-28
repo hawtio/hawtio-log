@@ -20,7 +20,7 @@ namespace Log {
       }, reloadOnSearch: false});
   }
 
-  export function LogRun(helpRegistry, preferencesRegistry, HawtioNav: HawtioMainNav.Registry,
+  export function LogRun(helpRegistry, preferencesRegistry, HawtioNav: Nav.Registry,
     logsService: LogsService) {
     'ngInject';
 

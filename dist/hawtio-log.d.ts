@@ -56,7 +56,7 @@ declare namespace Log {
 }
 declare namespace Log {
     function LogConfig($routeProvider: any): void;
-    function LogRun(helpRegistry: any, preferencesRegistry: any, HawtioNav: HawtioMainNav.Registry, logsService: LogsService): void;
+    function LogRun(helpRegistry: any, preferencesRegistry: any, HawtioNav: Nav.Registry, logsService: LogsService): void;
 }
 declare namespace Log {
     function logDateFilter($filter: any): (log: any) => any;
