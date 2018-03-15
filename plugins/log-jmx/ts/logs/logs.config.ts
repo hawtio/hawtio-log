@@ -2,7 +2,9 @@
 
 namespace Log {
 
-  let hasMBean: boolean = false;
+  const log: Logging.Logger = Logger.get('hawtio-log');
+
+  let showPlugin: boolean = false;
 
   export function LogConfig($routeProvider): void {
     'ngInject';
@@ -13,7 +15,7 @@ namespace Log {
         redirectTo: () => {
           // use a redirect, as the log plugin may not be valid, if we connect to a JVM which does not have the log mbean
           // in the JMX tree, and if that happens, we need to redirect to home, so another tab is selected
-          if (hasMBean) {
+          if (showPlugin) {
             return '/logs'
           } else {
             return '/home'
@@ -22,30 +24,53 @@ namespace Log {
       });
   }
 
-  export function LogRun(helpRegistry: Help.HelpRegistry, preferencesRegistry: Core.PreferencesRegistry,
-    HawtioNav: Nav.Registry, logsService: LogsService): void {
+  export function LogRun(
+    $rootScope: ng.IRootScopeService,
+    helpRegistry: Help.HelpRegistry,
+    preferencesRegistry: Core.PreferencesRegistry,
+    HawtioNav: Nav.Registry,
+    workspace: Jmx.Workspace,
+    logsService: LogsService): void {
     'ngInject';
 
     logsService.getLogQueryMBean()
       .then(mbean => {
-        hasMBean = mbean !== null;
+        if (!mbean) {
+          return;
+        }
 
-        helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', () => {
-          return hasMBean;
+        // check RBAC to figure out if this plugin should be visible
+        $rootScope.$on(Jmx.TreeEvent.Updated, () => {
+          showPlugin = workspace.hasInvokeRightsForName(mbean, OPERATION_GET_LOG_RESULTS);
+          log.debug('RBAC - Logs tab visible:', showPlugin);
+          registerPlugin(showPlugin, helpRegistry, preferencesRegistry, HawtioNav);
         });
-
-        preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", () => {
-          return hasMBean;
-        });
-
-        let navItem = HawtioNav.builder()
-          .id('logs')
-          .title(() => 'Logs')
-          .isValid(() => hasMBean)
-          .href(() => '/logs')
-          .build();
-        HawtioNav.add(navItem);
       });
+  }
+
+  function registerPlugin(
+    active: boolean,
+    helpRegistry: Help.HelpRegistry,
+    preferencesRegistry: Core.PreferencesRegistry,
+    HawtioNav: Nav.Registry): void {
+
+    helpRegistry.addUserDoc(
+      'log',
+      'plugins/log-jmx/doc/help.md',
+      () => active);
+
+    preferencesRegistry.addTab(
+      "Server Logs",
+      "plugins/log-jmx/html/log-preferences.html",
+      () => active);
+
+    let navItem = HawtioNav.builder()
+      .id('logs')
+      .title(() => 'Logs')
+      .isValid(() => active)
+      .href(() => '/logs')
+      .build();
+    HawtioNav.add(navItem);
   }
 
 }

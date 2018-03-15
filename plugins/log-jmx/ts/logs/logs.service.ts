@@ -2,6 +2,10 @@
 
 namespace Log {
 
+  export const OPERATION_GET_LOG_RESULTS = "getLogResults(int)";
+  export const OPERATION_JSON_QUERY_LOG_RESULTS = "jsonQueryLogResults";
+  export const SEARCH_LOG_QUERY_MBEAN = "*:type=LogQuery";
+
   export class LogsService {
 
     private logQueryBean: string;
@@ -14,7 +18,7 @@ namespace Log {
 
     getInitialLogs(): ng.IPromise<LogEntry[]> {
       return this.$q((resolve, reject) => {
-        this.jolokia.execute(this.logQueryBean, "getLogResults(int)", this.getLogCacheSize(), { 
+        this.jolokia.execute(this.logQueryBean, OPERATION_GET_LOG_RESULTS, this.getLogCacheSize(), {
           success: response => {
             if (response.events) {
               response.logEntries = response.events.map(event => new LogEntry(event));
@@ -31,7 +35,7 @@ namespace Log {
 
     getMoreLogs(fromTimestamp: number): ng.IPromise<LogEntry[]> {
       return this.$q((resolve, reject) => {
-        this.jolokia.execute(this.logQueryBean, "jsonQueryLogResults",
+        this.jolokia.execute(this.logQueryBean, OPERATION_JSON_QUERY_LOG_RESULTS,
           JSON.stringify({ afterTimestamp: fromTimestamp, count: this.getLogBatchSize() }), {
             success: response => {
               if (response.events) {
@@ -60,7 +64,7 @@ namespace Log {
 
     filterLogs(logs: LogEntry[], filterConfig): LogEntry[] {
       let filteredLogs = [...logs];
-      
+
       filterConfig.appliedFilters.forEach(filter => {
         switch (filter.id) {
           case 'level':
@@ -75,30 +79,30 @@ namespace Log {
             break;
         }
       });
-      
+
       if (!this.isLogSortAsc()) {
         filteredLogs = filteredLogs.reverse();
       }
-      
+
       filterConfig.totalCount = logs.length;
       filterConfig.resultsCount = filteredLogs.length;
-      
+
       return filteredLogs;
     }
 
     getLogQueryMBean(): ng.IPromise<string> {
       return this.$q((resolve, reject) => {
-        this.jolokia.search('*:type=LogQuery', {
-            success: response => {
-              if (response.length > 0) {
-                resolve(response[0])
-              } else {
-                resolve(null);
-              }
-            },
-            error: response => reject(response.error)
-          });
-      });      
+        this.jolokia.search(SEARCH_LOG_QUERY_MBEAN, {
+          success: response => {
+            if (response.length > 0) {
+              resolve(response[0])
+            } else {
+              resolve(null);
+            }
+          },
+          error: response => reject(response.error)
+        });
+      });
     }
 
     isLogSortAsc(): boolean {
