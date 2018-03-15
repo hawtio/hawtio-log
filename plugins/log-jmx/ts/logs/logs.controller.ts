@@ -95,7 +95,7 @@ namespace Log {
         logsService.getMoreLogs(fromTimestamp)
           .then(processLogEntries)
           .catch(error => {
-            Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+            Core.notification("danger", "Failed to get a response! " + JSON.stringify(error, null, 4));
           });
       }, UPDATE_INTERVAL_MILLIS);
     }
@@ -121,7 +121,7 @@ namespace Log {
     logsService.getInitialLogs()
       .then(processLogEntries)
       .catch(error => {
-        Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+        Core.notification("danger", "Failed to get a response! " + JSON.stringify(error, null, 4));
       });
   }
 
