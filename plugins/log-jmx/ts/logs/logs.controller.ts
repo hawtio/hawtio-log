@@ -9,11 +9,11 @@ namespace Log {
     const UPDATE_SIZE = 20;
     const UPDATE_INTERVAL_MILLIS = 5000;
     const scrollableTable = document.querySelector('.log-jmx-scrollable-table');
-    
+
     $scope.logs = [];
     $scope.filteredLogs = [];
     $scope.messageSearchText = [];
-    
+
     $scope.toolbarConfig = {
       filterConfig: {
         fields: [
@@ -26,13 +26,13 @@ namespace Log {
           },
           {
             id: 'logger',
-            title:  'Logger',
+            title: 'Logger',
             placeholder: 'Filter by logger...',
             filterType: 'text'
           },
           {
             id: 'message',
-            title:  'Message',
+            title: 'Message',
             placeholder: 'Filter by message...',
             filterType: 'text'
           }
@@ -47,11 +47,11 @@ namespace Log {
 
     function onFilterChange(filters) {
       let tableScrolled = isTableScrolled();
-      
+
       removePreviousLevelFilter(filters);
       $scope.messageSearchText = getMessageFilterValues(filters);
       $scope.filteredLogs = logsService.filterLogs($scope.logs, this);
-      
+
       if (tableScrolled) {
         scrollTable();
       }
@@ -79,10 +79,10 @@ namespace Log {
     function processLogEntries(response) {
       if (response.logEntries.length > 0) {
         let tableScrolled = isTableScrolled();
-        
+
         logsService.appendLogs($scope.logs, response.logEntries);
         $scope.filteredLogs = logsService.filterLogs($scope.logs, $scope.toolbarConfig.filterConfig);
-        
+
         if (tableScrolled) {
           scrollTable();
         }
@@ -95,7 +95,7 @@ namespace Log {
         logsService.getMoreLogs(fromTimestamp)
           .then(processLogEntries)
           .catch(error => {
-            Core.notification("danger", "Failed to get a response! " + JSON.stringify(error, null, 4));
+            Core.notification("danger", "Failed to get a response!<br/>" + JSON.stringify(error, null, 4));
           });
       }, UPDATE_INTERVAL_MILLIS);
     }
@@ -121,7 +121,7 @@ namespace Log {
     logsService.getInitialLogs()
       .then(processLogEntries)
       .catch(error => {
-        Core.notification("danger", "Failed to get a response! " + JSON.stringify(error, null, 4));
+        Core.notification("danger", "Failed to get a response!<br/>" + JSON.stringify(error, null, 4));
       });
   }
 
