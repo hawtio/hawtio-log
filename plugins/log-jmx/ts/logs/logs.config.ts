@@ -2,9 +2,9 @@
 
 namespace Log {
 
-  let hasMBean = false;
+  let hasMBean: boolean = false;
 
-  export function LogConfig($routeProvider) {
+  export function LogConfig($routeProvider): void {
     'ngInject';
 
     $routeProvider
@@ -22,8 +22,8 @@ namespace Log {
       });
   }
 
-  export function LogRun(helpRegistry, preferencesRegistry, HawtioNav: Nav.Registry,
-    logsService: LogsService) {
+  export function LogRun(helpRegistry: Help.HelpRegistry, preferencesRegistry: Core.PreferencesRegistry,
+    HawtioNav: Nav.Registry, logsService: LogsService): void {
     'ngInject';
 
     logsService.getLogQueryMBean()
