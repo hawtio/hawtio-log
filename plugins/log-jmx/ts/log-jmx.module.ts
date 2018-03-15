@@ -2,13 +2,13 @@
 /// <reference path="logs/logs.module.ts"/>
 
 namespace Log {
-  
-  var pluginName = 'log';
+
+  const pluginName: string = 'log';
 
   angular.module(pluginName, [
-      LogPreferencesModule,
-      LogsModule
-    ]);
+    LogPreferencesModule,
+    LogsModule
+  ]);
 
   hawtioPluginLoader.addModule(pluginName);
 }
