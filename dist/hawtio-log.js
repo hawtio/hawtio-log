@@ -107,6 +107,9 @@ var Log;
 /// <reference path="log-entry.ts"/>
 var Log;
 (function (Log) {
+    Log.OPERATION_GET_LOG_RESULTS = "getLogResults(int)";
+    Log.OPERATION_JSON_QUERY_LOG_RESULTS = "jsonQueryLogResults";
+    Log.SEARCH_LOG_QUERY_MBEAN = "*:type=LogQuery";
     var LogsService = (function () {
         LogsService.$inject = ["$q", "jolokia", "localStorage"];
         function LogsService($q, jolokia, localStorage) {
@@ -121,7 +124,7 @@ var Log;
         LogsService.prototype.getInitialLogs = function () {
             var _this = this;
             return this.$q(function (resolve, reject) {
-                _this.jolokia.execute(_this.logQueryBean, "getLogResults(int)", _this.getLogCacheSize(), {
+                _this.jolokia.execute(_this.logQueryBean, Log.OPERATION_GET_LOG_RESULTS, _this.getLogCacheSize(), {
                     success: function (response) {
                         if (response.events) {
                             response.logEntries = response.events.map(function (event) { return new Log.LogEntry(event); });
@@ -139,7 +142,7 @@ var Log;
         LogsService.prototype.getMoreLogs = function (fromTimestamp) {
             var _this = this;
             return this.$q(function (resolve, reject) {
-                _this.jolokia.execute(_this.logQueryBean, "jsonQueryLogResults", JSON.stringify({ afterTimestamp: fromTimestamp, count: _this.getLogBatchSize() }), {
+                _this.jolokia.execute(_this.logQueryBean, Log.OPERATION_JSON_QUERY_LOG_RESULTS, JSON.stringify({ afterTimestamp: fromTimestamp, count: _this.getLogBatchSize() }), {
                     success: function (response) {
                         if (response.events) {
                             response.logEntries = response.events.map(function (event) { return new Log.LogEntry(event); });
@@ -189,7 +192,7 @@ var Log;
         LogsService.prototype.getLogQueryMBean = function () {
             var _this = this;
             return this.$q(function (resolve, reject) {
-                _this.jolokia.search('*:type=LogQuery', {
+                _this.jolokia.search(Log.SEARCH_LOG_QUERY_MBEAN, {
                     success: function (response) {
                         if (response.length > 0) {
                             resolve(response[0]);
@@ -226,45 +229,54 @@ var Log;
 var Log;
 (function (Log) {
     LogConfig.$inject = ["$routeProvider"];
-    LogRun.$inject = ["helpRegistry", "preferencesRegistry", "HawtioNav", "logsService"];
-    var hasMBean = false;
+    LogRun.$inject = ["$rootScope", "helpRegistry", "preferencesRegistry", "HawtioNav", "workspace", "logsService"];
+    var log = Logger.get('hawtio-log');
+    var showPlugin = false;
     function LogConfig($routeProvider) {
         'ngInject';
-        $routeProvider.
-            when('/logs', { templateUrl: 'plugins/log-jmx/html/logs.html', reloadOnSearch: false }).
-            when('/openlogs', { redirectTo: function () {
+        $routeProvider
+            .when('/logs', { templateUrl: 'plugins/log-jmx/html/logs.html', reloadOnSearch: false })
+            .when('/openlogs', {
+            redirectTo: function () {
                 // use a redirect, as the log plugin may not be valid, if we connect to a JVM which does not have the log mbean
                 // in the JMX tree, and if that happens, we need to redirect to home, so another tab is selected
-                if (hasMBean) {
+                if (showPlugin) {
                     return '/logs';
                 }
                 else {
                     return '/home';
                 }
-            }, reloadOnSearch: false });
+            }, reloadOnSearch: false
+        });
     }
     Log.LogConfig = LogConfig;
-    function LogRun(helpRegistry, preferencesRegistry, HawtioNav, logsService) {
+    function LogRun($rootScope, helpRegistry, preferencesRegistry, HawtioNav, workspace, logsService) {
         'ngInject';
         logsService.getLogQueryMBean()
             .then(function (mbean) {
-            hasMBean = mbean !== null;
-            helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', function () {
-                return hasMBean;
+            if (!mbean) {
+                return;
+            }
+            // check RBAC to figure out if this plugin should be visible
+            $rootScope.$on(Jmx.TreeEvent.Updated, function () {
+                showPlugin = workspace.hasInvokeRightsForName(mbean, Log.OPERATION_GET_LOG_RESULTS);
+                log.debug('RBAC - Logs tab visible:', showPlugin);
+                registerPlugin(showPlugin, helpRegistry, preferencesRegistry, HawtioNav);
             });
-            preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", function () {
-                return hasMBean;
-            });
-            var navItem = HawtioNav.builder()
-                .id('logs')
-                .title(function () { return 'Logs'; })
-                .isValid(function () { return hasMBean; })
-                .href(function () { return '/logs'; })
-                .build();
-            HawtioNav.add(navItem);
         });
     }
     Log.LogRun = LogRun;
+    function registerPlugin(active, helpRegistry, preferencesRegistry, HawtioNav) {
+        helpRegistry.addUserDoc('log', 'plugins/log-jmx/doc/help.md', function () { return active; });
+        preferencesRegistry.addTab("Server Logs", "plugins/log-jmx/html/log-preferences.html", function () { return active; });
+        var navItem = HawtioNav.builder()
+            .id('logs')
+            .title(function () { return 'Logs'; })
+            .isValid(function () { return active; })
+            .href(function () { return '/logs'; })
+            .build();
+        HawtioNav.add(navItem);
+    }
 })(Log || (Log = {}));
 var Log;
 (function (Log) {
@@ -393,7 +405,7 @@ var Log;
                 logsService.getMoreLogs(fromTimestamp)
                     .then(processLogEntries)
                     .catch(function (error) {
-                    Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+                    Core.notification("danger", "Failed to get a response!<br/>" + JSON.stringify(error, null, 4));
                 });
             }, UPDATE_INTERVAL_MILLIS);
         }
@@ -418,7 +430,7 @@ var Log;
         logsService.getInitialLogs()
             .then(processLogEntries)
             .catch(function (error) {
-            Core.notification("error", "Failed to get a response! " + JSON.stringify(error, null, 4));
+            Core.notification("danger", "Failed to get a response!<br/>" + JSON.stringify(error, null, 4));
         });
     }
     Log.LogsController = LogsController;

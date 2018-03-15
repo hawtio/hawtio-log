@@ -1,5 +1,6 @@
 /// <reference types="angular" />
 /// <reference types="core" />
+/// <reference types="jmx" />
 declare namespace Log {
     function LogPreferencesController($scope: any, localStorage: any): void;
 }
@@ -37,6 +38,9 @@ declare namespace Log {
     }
 }
 declare namespace Log {
+    const OPERATION_GET_LOG_RESULTS = "getLogResults(int)";
+    const OPERATION_JSON_QUERY_LOG_RESULTS = "jsonQueryLogResults";
+    const SEARCH_LOG_QUERY_MBEAN = "*:type=LogQuery";
     class LogsService {
         private $q;
         private jolokia;
@@ -56,7 +60,7 @@ declare namespace Log {
 }
 declare namespace Log {
     function LogConfig($routeProvider: any): void;
-    function LogRun(helpRegistry: any, preferencesRegistry: any, HawtioNav: Nav.Registry, logsService: LogsService): void;
+    function LogRun($rootScope: ng.IRootScopeService, helpRegistry: Help.HelpRegistry, preferencesRegistry: Core.PreferencesRegistry, HawtioNav: Nav.Registry, workspace: Jmx.Workspace, logsService: LogsService): void;
 }
 declare namespace Log {
     function logDateFilter($filter: any): (log: any) => any;
