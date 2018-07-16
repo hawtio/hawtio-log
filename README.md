@@ -1,3 +1,7 @@
+# DEPRECATED
+
+**This project is not being actively developed or maintained.**
+
 # hawtio-log
 
 This plugin shows log information from the managed services.
