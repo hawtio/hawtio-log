@@ -229,7 +229,7 @@ var Log;
 var Log;
 (function (Log) {
     LogConfig.$inject = ["$routeProvider"];
-    LogRun.$inject = ["$rootScope", "helpRegistry", "preferencesRegistry", "HawtioNav", "workspace", "logsService"];
+    LogRun.$inject = ["$rootScope", "helpRegistry", "preferencesRegistry", "HawtioNav", "workspace", "logsService", "treeService"];
     var log = Logger.get('hawtio-log');
     var showPlugin = false;
     function LogConfig($routeProvider) {
@@ -250,7 +250,7 @@ var Log;
         });
     }
     Log.LogConfig = LogConfig;
-    function LogRun($rootScope, helpRegistry, preferencesRegistry, HawtioNav, workspace, logsService) {
+    function LogRun($rootScope, helpRegistry, preferencesRegistry, HawtioNav, workspace, logsService, treeService) {
         'ngInject';
         logsService.getLogQueryMBean()
             .then(function (mbean) {
@@ -258,7 +258,7 @@ var Log;
                 return;
             }
             // check RBAC to figure out if this plugin should be visible
-            $rootScope.$on(Jmx.TreeEvent.Updated, function () {
+            treeService.runWhenTreeReady(function () {
                 showPlugin = workspace.hasInvokeRightsForName(mbean, Log.OPERATION_GET_LOG_RESULTS);
                 log.debug('RBAC - Logs tab visible:', showPlugin);
                 registerPlugin(showPlugin, helpRegistry, preferencesRegistry, HawtioNav);

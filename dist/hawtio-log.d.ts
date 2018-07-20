@@ -60,7 +60,7 @@ declare namespace Log {
 }
 declare namespace Log {
     function LogConfig($routeProvider: any): void;
-    function LogRun($rootScope: ng.IRootScopeService, helpRegistry: Help.HelpRegistry, preferencesRegistry: Core.PreferencesRegistry, HawtioNav: Nav.Registry, workspace: Jmx.Workspace, logsService: LogsService): void;
+    function LogRun($rootScope: ng.IRootScopeService, helpRegistry: Help.HelpRegistry, preferencesRegistry: Core.PreferencesRegistry, HawtioNav: Nav.Registry, workspace: Jmx.Workspace, logsService: LogsService, treeService: Jmx.TreeService): void;
 }
 declare namespace Log {
     function logDateFilter($filter: any): (log: any) => any;

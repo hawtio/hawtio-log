@@ -30,7 +30,8 @@ namespace Log {
     preferencesRegistry: Core.PreferencesRegistry,
     HawtioNav: Nav.Registry,
     workspace: Jmx.Workspace,
-    logsService: LogsService): void {
+    logsService: LogsService,
+    treeService: Jmx.TreeService): void {
     'ngInject';
 
     logsService.getLogQueryMBean()
@@ -40,7 +41,7 @@ namespace Log {
         }
 
         // check RBAC to figure out if this plugin should be visible
-        $rootScope.$on(Jmx.TreeEvent.Updated, () => {
+        treeService.runWhenTreeReady(() => {
           showPlugin = workspace.hasInvokeRightsForName(mbean, OPERATION_GET_LOG_RESULTS);
           log.debug('RBAC - Logs tab visible:', showPlugin);
           registerPlugin(showPlugin, helpRegistry, preferencesRegistry, HawtioNav);
